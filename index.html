@@ -1,176 +1,340 @@
-  <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Marker animations with <code>setTimeout()</code></title>
-    <style>
-      /* Always set the map height explicitly to define the size of the div
-       * element that contains the map. */
-      #map {
-        height: 100%;
-      }
-      /* Optional: Makes the sample page fill the window. */
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      #floating-panel {
-        position: absolute;
-        top: 10px;
-        left: 25%;
-        z-index: 5;
-        background-color: #fff;
-        padding: 5px;
-        border: 1px solid #999;
-        text-align: center;
-        font-family: 'Roboto','sans-serif';
-        line-height: 30px;
-        padding-left: 10px;
-      }
-      #floating-panel {
-        margin-left: -52px;
-      }
-    </style>
-  </head>
-  <body>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <title>WebRTC Scalable Broadcast using RTCMultiConnection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="//viddiflash.com/css/stylesheet.css">
+</head>
+<body>
+    <h1>
+    WebRTC Scalable Broadcast using RTCMultiConnection
+    <p>
+      Use peer-to-peer protocol to broadcast your video over 20+ users.
+    </p>
+  </h1>
+  
+  <section class="make-center">
+      <div class="make-center">
+      <input type="text" id="broadcast-id" value="room-xyz" autocorrect=off autocapitalize=off size=20>
+      <button id="open-or-join">Open or Join Broadcast</button>
 
-    <div id="map"></div>
-    <script>
+      <div id="room-urls" style="text-align: center;display: none;background: #F1EDED;margin: 15px -10px;border: 1px solid rgb(189, 189, 189);border-left: 0;border-right: 0;"></div>
+      <div class="make-center" id="broadcast-viewers-counter"></div>
 
-      // If you're adding a number of markers, you may want to drop them on the map
-      // consecutively rather than all at once. This example shows how to use
-      // window.setTimeout() to space your markers' animation.
+      <video id="video-preview" controls loop></video>
+  </section>
 
-      var neighborhoodsgreen = [
-        {lat: 52.511, lng: 13.447},
-        {lat: 52.549, lng: 13.422},
-        {lat: 52.497, lng: 13.396},
-        {lat: 67.382, lng: -142.293},
-        {lat: 65.362, lng: -134.727},
-        {lat: 65.237, lng: 127.939},
-        {lat: 59.151, lng: -113.486},
-        {lat: 47.022, lng: -102.039},
-        {lat: 50.223, lng: -73.713},
-        {lat: 35.617, lng: -98.641},
-        {lat: 26.146, lng: -101.721},
-        {lat: 16.753, lng: -91.170},
-        {lat: 2.835, lng: -79.240},
-        {lat: -4.143, lng: -58.774},
-        {lat: -8.220, lng: -53.119},
-        {lat: -10.828, lng: -63.553},
-        {lat: -22.605, lng: -44.821},
-        {lat: -31.241, lng: -73.338},
-        {lat: 22.703, lng: -7.547},
-        {lat: 19.359, lng: 19.359},
-        {lat: 13.966, lng: 13.966},
-        {lat: 15.150, lng: 6.752},
-        {lat: -3.0944, lng: 19.940},
-        {lat: 34.859, lng: 57.463},
-        {lat: 50.080, lng: 41.078},
-        {lat: 46.150, lng: 20.428},,
-        {lat: 30.238, lng: -3.379},
-        {lat: 6.144, lng: 27.074},
-        {lat: -19.591, lng: 44.971},
-        {lat: -22.082, lng: 20.431},
-        {lat: -25.616, lng: 26.635},
-        {lat: -29.250, lng: 23.393},,
-        {lat: 57.650, lng: 90.913},
-        {lat: 49.400, lng: 136.670},
-        {lat: 44.187, lng: 123.705},
-        {lat: 32.444, lng: 122.246},
-        {lat: -5.369, lng: 139.86},
-        {lat: -27.257, lng: 172.368},
-        {lat: -31.432, lng: 146.252},
-        {lat: -35.152, lng: 142.827}
-      ];
-
-
-      var neighborhoodsred = [
-        {lat: 53.511, lng: 15.447},
-        {lat: 53.549, lng: 11.422},
-        {lat: 53.497, lng: 12.396},
-        {lat: 68.382, lng: -102.293},
-        {lat: 66.362, lng: -184.727},
-        {lat: 66.237, lng: 120.939},
-        {lat: 60.151, lng: -153.486},
-        {lat: 46.022, lng: -109.039},
-        {lat: 52.223, lng: -93.713},
-        {lat: 32.617, lng: -108.641},
-        {lat: 27.146, lng: -108.721},
-        {lat: 15.753, lng: -111.170},
-        {lat: 1.835, lng: -59.240},
-        {lat: -3.143, lng: -68.774},
-        {lat: -7.220, lng: -73.119},
-        {lat: 21.703, lng: -5.547},
-        {lat: 18.359, lng: 29.359},
-        {lat: 12.966, lng: 18.966},
-        {lat: 14.150, lng: 8.752},
-        {lat: 35.695, lng: 70.928},
-        {lat: 46.151, lng: 42.443},
-        {lat: 5.496, lng: 48.804},
-        {lat: 46.150, lng: 20.428},
-        {lat: 22.350, lng: -0.562},
-        {lat: 14.130, lng: 3.692},
-        {lat: 9.223, lng: 11.978},
-        {lat: -6.593, lng: 26.593},
-        {lat: -10.726, lng: 35.382},
-        {lat: -17.240, lng: 27.493},
-        {lat: -29.250, lng: 23.393},
-        {lat: 15.661, lng: 77.823},
-        {lat: 33.061, lng: 72.134},
-        {lat: 28.724, lng: 54.474},
-        {lat: 51.6074, lng: 58.167},
-        {lat: 56.041, lng: 81.475},
-        {lat: -36.624, lng: 142.309},
-        {lat: -45.180, lng: 168.589},
-        {lat: -39.148, lng: 175.983}
-      ];
-
-      
-
-      var markers = [];
-      var map;
-
-      function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 1,
-          center: {lat: 52.520, lng: 13.410}
+<script src="//viddiflash.com/js/RTCMultiConnection.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+<!-- <script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script> -->
+<script>
+// recording is disabled because it is resulting for browser-crash
+// if you enable below line, please also uncomment above "RecordRTC.js"
+var enableRecordings = false;
+var connection = new RTCMultiConnection();
+// its mandatory in v3
+connection.enableScalableBroadcast = true;
+// each relaying-user should serve only 1 users
+connection.maxRelayLimitPerUser = 1;
+// we don't need to keep room-opened
+// scalable-broadcast.js will handle stuff itself.
+connection.autoCloseEntireSession = true;
+// by default, socket.io server is assumed to be deployed on your own URL
+//connection.socketURL = '/';
+// comment-out below line if you do not have your own socket.io server
+    connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+connection.socketMessageEvent = 'scalable-media-broadcast-demo';
+// document.getElementById('broadcast-id').value = connection.userid;
+// user need to connect server, so that others can reach him.
+connection.connectSocket(function(socket) {
+    socket.on('logs', function(log) {
+        document.querySelector('h1').innerHTML = log.replace(/</g, '----').replace(/>/g, '___').replace(/----/g, '(<span style="color:red;">').replace(/___/g, '</span>)');
+    });
+    // this event is emitted when a broadcast is already created.
+    socket.on('join-broadcaster', function(hintsToJoinBroadcast) {
+        console.log('join-broadcaster', hintsToJoinBroadcast);
+        connection.session = hintsToJoinBroadcast.typeOfStreams;
+        connection.sdpConstraints.mandatory = {
+            OfferToReceiveVideo: !!connection.session.video,
+            OfferToReceiveAudio: !!connection.session.audio
+        };
+        connection.broadcastId = hintsToJoinBroadcast.broadcastId;
+        connection.join(hintsToJoinBroadcast.userid);
+    });
+    socket.on('rejoin-broadcast', function(broadcastId) {
+        console.log('rejoin-broadcast', broadcastId);
+        connection.attachStreams = [];
+        socket.emit('check-broadcast-presence', broadcastId, function(isBroadcastExists) {
+            if (!isBroadcastExists) {
+                // the first person (i.e. real-broadcaster) MUST set his user-id
+                connection.userid = broadcastId;
+            }
+            socket.emit('join-broadcast', {
+                broadcastId: broadcastId,
+                userid: connection.userid,
+                typeOfStreams: connection.session
+            });
         });
-
-        drop();
-      }
-
-      function drop() {
-        clearMarkers();
-        for (var i = 0; i < neighborhoodsgreen.length; i++) {
-          addMarkerWithTimeout(neighborhoodsgreen[i], i * 200, 'http://www.animatedgif.net/bulletsballs/ball4-1_e0.gif');
-          addMarkerWithTimeout(neighborhoodsred[i], i * 200, 'http://balaji.waphall.com/images/icon/ball/10.gif');
+    });
+    socket.on('broadcast-stopped', function(broadcastId) {
+        // alert('Broadcast has been stopped.');
+        // location.reload();
+        console.error('broadcast-stopped', broadcastId);
+        alert('This broadcast has been stopped.');
+    });
+    // this event is emitted when a broadcast is absent.
+    socket.on('start-broadcasting', function(typeOfStreams) {
+        console.log('start-broadcasting', typeOfStreams);
+        // host i.e. sender should always use this!
+        connection.sdpConstraints.mandatory = {
+            OfferToReceiveVideo: false,
+            OfferToReceiveAudio: false
+        };
+        connection.session = typeOfStreams;
+        // "open" method here will capture media-stream
+        // we can skip this function always; it is totally optional here.
+        // we can use "connection.getUserMediaHandler" instead
+        connection.open(connection.userid, function() {
+            showRoomURL(connection.sessionid);
+        });
+    });
+});
+window.onbeforeunload = function() {
+    // Firefox is ugly.
+    document.getElementById('open-or-join').disabled = false;
+};
+var videoPreview = document.getElementById('video-preview');
+connection.onstream = function(event) {
+    if (connection.isInitiator && event.type !== 'local') {
+        return;
+    }
+    if (event.mediaElement) {
+        event.mediaElement.pause();
+        delete event.mediaElement;
+    }
+    connection.isUpperUserLeft = false;
+    videoPreview.src = URL.createObjectURL(event.stream);
+    videoPreview.play();
+    videoPreview.userid = event.userid;
+    if (event.type === 'local') {
+        videoPreview.muted = true;
+    }
+    if (connection.isInitiator == false && event.type === 'remote') {
+        // he is merely relaying the media
+        connection.dontCaptureUserMedia = true;
+        connection.attachStreams = [event.stream];
+        connection.sdpConstraints.mandatory = {
+            OfferToReceiveAudio: false,
+            OfferToReceiveVideo: false
+        };
+        var socket = connection.getSocket();
+        socket.emit('can-relay-broadcast');
+        if (connection.DetectRTC.browser.name === 'Chrome') {
+            connection.getAllParticipants().forEach(function(p) {
+                if (p + '' != event.userid + '') {
+                    var peer = connection.peers[p].peer;
+                    peer.getLocalStreams().forEach(function(localStream) {
+                        peer.removeStream(localStream);
+                    });
+                    peer.addStream(event.stream);
+                    connection.dontAttachStream = true;
+                    connection.renegotiate(p);
+                    connection.dontAttachStream = false;
+                }
+            });
         }
-      }
-
-      function addMarkerWithTimeout(position, timeout, icon) {
-        window.setTimeout(function() {
-          markers.push(new google.maps.Marker({
-            position: position,
-            map: map,
-            animation: google.maps.Animation.DROP,
-            icon: icon,
-            optimized: false
-
-          }));
-        }, timeout);
-      }
-
-      function clearMarkers() {
-        for (var i = 0; i < markers.length; i++) {
-          markers[i].setMap(null);
+        if (connection.DetectRTC.browser.name === 'Firefox') {
+            // Firefox is NOT supporting removeStream method
+            // that's why using alternative hack.
+            // NOTE: Firefox seems unable to replace-tracks of the remote-media-stream
+            // need to ask all deeper nodes to rejoin
+            connection.getAllParticipants().forEach(function(p) {
+                if (p + '' != event.userid + '') {
+                    connection.replaceTrack(event.stream, p);
+                }
+            });
         }
-        markers = [];
-      }
-    </script>
-    <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA9FGQHTjimlCKxORS3EdPkyWmZpq11faY&callback=initMap">
-    </script>
-  </body>
+        // Firefox seems UN_ABLE to record remote MediaStream
+        // WebAudio solution merely records audio
+        // so recording is skipped for Firefox.
+        if (connection.DetectRTC.browser.name === 'Chrome') {
+            repeatedlyRecordStream(event.stream);
+        }
+    }
+};
+// ask node.js server to look for a broadcast
+// if broadcast is available, simply join it. i.e. "join-broadcaster" event should be emitted.
+// if broadcast is absent, simply create it. i.e. "start-broadcasting" event should be fired.
+document.getElementById('open-or-join').onclick = function() {
+    var broadcastId = document.getElementById('broadcast-id').value;
+    if (broadcastId.replace(/^\s+|\s+$/g, '').length <= 0) {
+        alert('Please enter broadcast-id');
+        document.getElementById('broadcast-id').focus();
+        return;
+    }
+    document.getElementById('open-or-join').disabled = true;
+    connection.session = {
+        audio: true,
+        video: true,
+        oneway: true
+    };
+    var socket = connection.getSocket();
+    socket.emit('check-broadcast-presence', broadcastId, function(isBroadcastExists) {
+        if (!isBroadcastExists) {
+            // the first person (i.e. real-broadcaster) MUST set his user-id
+            connection.userid = broadcastId;
+        }
+        console.log('check-broadcast-presence', broadcastId, isBroadcastExists);
+        socket.emit('join-broadcast', {
+            broadcastId: broadcastId,
+            userid: connection.userid,
+            typeOfStreams: connection.session
+        });
+    });
+};
+connection.onstreamended = function() {};
+connection.onleave = function(event) {
+    if (event.userid !== videoPreview.userid) return;
+    var socket = connection.getSocket();
+    socket.emit('can-not-relay-broadcast');
+    connection.isUpperUserLeft = true;
+    if (allRecordedBlobs.length) {
+        // playing lats recorded blob
+        var lastBlob = allRecordedBlobs[allRecordedBlobs.length - 1];
+        videoPreview.src = URL.createObjectURL(lastBlob);
+        videoPreview.play();
+        allRecordedBlobs = [];
+    } else if (connection.currentRecorder) {
+        var recorder = connection.currentRecorder;
+        connection.currentRecorder = null;
+        recorder.stopRecording(function() {
+            if (!connection.isUpperUserLeft) return;
+            videoPreview.src = URL.createObjectURL(recorder.blob);
+            videoPreview.play();
+        });
+    }
+    if (connection.currentRecorder) {
+        connection.currentRecorder.stopRecording();
+        connection.currentRecorder = null;
+    }
+};
+var allRecordedBlobs = [];
+function repeatedlyRecordStream(stream) {
+    if (!enableRecordings) {
+        return;
+    }
+    connection.currentRecorder = RecordRTC(stream, {
+        type: 'video'
+    });
+    connection.currentRecorder.startRecording();
+    setTimeout(function() {
+        if (connection.isUpperUserLeft || !connection.currentRecorder) {
+            return;
+        }
+        connection.currentRecorder.stopRecording(function() {
+            allRecordedBlobs.push(connection.currentRecorder.blob);
+            if (connection.isUpperUserLeft) {
+                return;
+            }
+            connection.currentRecorder = null;
+            repeatedlyRecordStream(stream);
+        });
+    }, 30 * 1000); // 30-seconds
+};
+function disableInputButtons() {
+    document.getElementById('open-or-join').disabled = true;
+    document.getElementById('broadcast-id').disabled = true;
+}
+// ......................................................
+// ......................Handling broadcast-id................
+// ......................................................
+function showRoomURL(broadcastId) {
+    var roomHashURL = '#' + broadcastId;
+    var roomQueryStringURL = '?broadcastId=' + broadcastId;
+    var html = '<h2>Unique URL for your room:</h2><br>';
+    html += 'Hash URL: <a href="' + roomHashURL + '" target="_blank">' + roomHashURL + '</a>';
+    html += '<br>';
+    html += 'QueryString URL: <a href="' + roomQueryStringURL + '" target="_blank">' + roomQueryStringURL + '</a>';
+    var roomURLsDiv = document.getElementById('room-urls');
+    roomURLsDiv.innerHTML = html;
+    roomURLsDiv.style.display = 'block';
+}
+(function() {
+    var params = {},
+        r = /([^&=]+)=?([^&]*)/g;
+    function d(s) {
+        return decodeURIComponent(s.replace(/\+/g, ' '));
+    }
+    var match, search = window.location.search;
+    while (match = r.exec(search.substring(1)))
+        params[d(match[1])] = d(match[2]);
+    window.params = params;
+})();
+var broadcastId = '';
+if (localStorage.getItem(connection.socketMessageEvent)) {
+    broadcastId = localStorage.getItem(connection.socketMessageEvent);
+} else {
+    broadcastId = connection.token();
+}
+document.getElementById('broadcast-id').value = broadcastId;
+document.getElementById('broadcast-id').onkeyup = function() {
+    localStorage.setItem(connection.socketMessageEvent, this.value);
+};
+var hashString = location.hash.replace('#', '');
+if (hashString.length && hashString.indexOf('comment-') == 0) {
+    hashString = '';
+}
+var broadcastId = params.broadcastId;
+if (!broadcastId && hashString.length) {
+    broadcastId = hashString;
+}
+if (broadcastId && broadcastId.length) {
+    document.getElementById('broadcast-id').value = broadcastId;
+    localStorage.setItem(connection.socketMessageEvent, broadcastId);
+    // auto-join-room
+    (function reCheckRoomPresence() {
+        connection.checkPresence(broadcastId, function(isRoomExists) {
+            if (isRoomExists) {
+                document.getElementById('open-or-join').onclick();
+                return;
+            }
+            setTimeout(reCheckRoomPresence, 5000);
+        });
+    })();
+    disableInputButtons();
+}
+// below section detects how many users are viewing your broadcast
+connection.onNumberOfBroadcastViewersUpdated = function(event) {
+    if (!connection.isInitiator) return;
+    document.getElementById('broadcast-viewers-counter').innerHTML = 'Number of broadcast viewers: <b>' + event.numberOfBroadcastViewers + '</b>';
+};
+</script>
+
+  <section>
+    <h2>How this works?</h2>
+    <p>
+      This module simply initializes socket.io and configures it in a way that single audio/video/screen stream can be shared/relayed over unlimited users without any <a href="https://www.webrtc-experiment.com/docs/RTP-usage.html">bandwidth/CPU usage issues</a>. Everything happens peer-to-peer!
+    </p>
+    <p>
+      Check <a href="https://github.com/muaz-khan/WebRTC-Experiment/issues/2">this thread</a> or <a href="https://github.com/muaz-khan/WebRTC-Scalable-Broadcast">this github repository</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2>iOS or Android</h2>
+    <p>
+      This demo <a href="http://webrtcweb.com/cordova-apps/scalable-broadcast/" target="_blank">has built-in (open-sourced)</a> cordova apps both for <b>iOS</b> and <b>Android</b>.
+    </p>
+    <p>
+      Google AppStore Link: <a href="https://play.google.com/store/apps/details?id=com.webrtc.scalablebroadcast" target="_blank">https://play.google.com/store/apps/details?id=com.webrtc.scalablebroadcast</a>
+    </p>
+  </section>
+
+  <footer>
+    <small id="send-message"></small>
+  </footer>
+
+  <script src="https://cdn.webrtc-experiment.com/common.js"></script>
+</body>
 </html>
